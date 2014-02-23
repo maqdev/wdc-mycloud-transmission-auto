@@ -28,7 +28,10 @@ else
 fi
 
 function startVPN {
-   	bash -c "cd /etc/openvpn && openvpn --config '$VPN_CFG'" > /dev/null &
+	ps ax | grep 'openvpn' | grep -vw grep | awk '{print $1}' | xargs kill -9
+	sleep 5	
+   	bash -c "cd /etc/openvpn && openvpn --config '$VPN_CFG'" &
+   	sleep 10
 } 
 
 function startTransmission {
