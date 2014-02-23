@@ -45,6 +45,15 @@ function startTransmission {
 	if [ $R -ne 0 ];then
 		/etc/init.d/transmission-daemon start
 		sleep 10
+
+
+		transmission-remote --list | while read line; do
+		TR_ID=`echo "$line" | cut -c1-4 | tr -d ' '`
+		re='^[0-9]+$'
+		if [[ $TR_ID =~ $re ]] ; then			
+			transmission-remote -t "$TR_ID" --start
+		fi
+  	done
 	fi
 }
 
