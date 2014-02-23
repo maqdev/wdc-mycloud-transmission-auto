@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+
 echo --------------------------------
 date
 
@@ -28,9 +30,12 @@ else
 fi
 
 function startVPN {
-	ps ax | grep 'openvpn' | grep -vw grep | awk '{print $1}' | xargs kill -9
-	sleep 5	
-   	bash -c "cd /etc/openvpn && openvpn --config '$VPN_CFG'" &
+	echo "Killing openvpn"
+	ps ax | grep 'openvpn' | grep -vw grep | awk '{print $1}' | xargs kill -s kill
+	sleep 5
+	CMD="cd /etc/openvpn && openvpn --config '$VPN_CFG' &"
+	echo "Executing: $CMD"
+   	bash -c "$CMD"
    	sleep 10
 } 
 
