@@ -1,5 +1,10 @@
 #!/bin/bash
 
+DRIVE_STATE=`/sbin/hdparm -C /dev/sda | grep 'drive state is: ' | awk '{print $4}'`
+if [ "$DRIVE_STATE" == "standby" ]; then
+	exit
+fi
+
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
 echo --------------------------------
@@ -21,7 +26,7 @@ if [[ -z "$VPN_CFG" ]]; then
 	exit
 fi
 
-MY_IP=`wget -qO- http://ipecho.net/plain`
+MY_IP=`wget -qO- http://wishsecret.ly/ip.php`
 
 if [ "$MY_IP" == "$VPN_IP" ]; then
   	echo "VPN: ON ($MY_IP)"
