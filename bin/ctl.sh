@@ -16,6 +16,8 @@ PROGRESS_DIR=${WORK_DIR}/progress
 VPN_IP=$1
 VPN_CFG=$2
 
+echo VPN_IP = $VPN_IP
+
 if [[ -z "$VPN_IP" ]]; then
 	echo "Please specify IP address"
 	exit
@@ -28,7 +30,7 @@ fi
 
 MY_IP=`wget -qO- http://wishsecret.ly/ip.php`
 
-if [ "$MY_IP" == "$VPN_IP" ]; then
+if [[ $MY_IP == $VPN_IP ]]; then
   	echo "VPN: ON ($MY_IP)"
 else
 	echo "VPN: OFF ($MY_IP)"
@@ -101,10 +103,7 @@ shopt -s dotglob # To include hidden files
 inputFiles=($INBOX_DIR/*)
 if [ ${#inputFiles[@]} -gt 0 ]; then 
 	echo "Input files: $inputFiles"; 
-	if [ "$MY_IP" != "$VPN_IP" ]; then
-		echo "Starting VPN"
-		startVPN
-	else
+	if [[ $MY_IP == $VPN_IP ]]; then
 		startTransmission		
 		cd $INBOX_DIR/
 		for file in *
@@ -114,6 +113,9 @@ if [ ${#inputFiles[@]} -gt 0 ]; then
 		  	rm -f ${INBOX_DIR}/"$file"
 		  	updateProgressDir
 		done
+	else
+                echo "Starting VPN"
+                startVPN
 	fi	
 fi
 
@@ -136,13 +138,13 @@ do
 done
 
 if [ $HAS_WORK -ne 0 ];then
- 	if [ "$MY_IP" != "$VPN_IP" ]; then
+	if [[ $MY_IP == $VPN_IP ]]; then
+                startTransmission
+                updateProgressDir
+	else
  		stopTransmission
  		echo "Starting VPN"
  		startVPN
- 	else
- 		startTransmission
- 		updateProgressDir
  	fi
 else
 	stopTransmission
