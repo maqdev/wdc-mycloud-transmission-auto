@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 DRIVE_STATE=`/sbin/hdparm -C /dev/sda | grep 'drive state is: ' | awk '{print $4}'`
 if [ "$DRIVE_STATE" == "standby" ]; then
 	exit
@@ -44,33 +46,25 @@ function startVPN {
 	echo "Executing: $CMD"
    	bash -c "$CMD"
    	sleep 10
-} 
+}
 
 function startTransmission {
-	/etc/init.d/transmission-daemon status > /dev/null
-	R=$?
-	if [ $R -ne 0 ];then
-		/etc/init.d/transmission-daemon start
+	if [[ "$(ps -ef|grep -v grep|grep transmission-daemon)" == "" ]] ; then
+		transmission-daemon
 		sleep 10
 
-
 		transmission-remote --list | while read line; do
-		TR_ID=`echo "$line" | cut -c1-4 | tr -d ' '`
-		re='^[0-9]+$'
-		if [[ $TR_ID =~ $re ]] ; then			
-			transmission-remote -t "$TR_ID" --start
-		fi
-  	done
+			TR_ID=`echo "$line" | cut -c1-4 | tr -d ' '`
+			re='^[0-9]+$'
+			if [[ $TR_ID =~ $re ]] ; then
+				transmission-remote -t "$TR_ID" --start
+			fi
+		done
 	fi
 }
 
 function stopTransmission {
-	/etc/init.d/transmission-daemon status > /dev/null
-	R=$?
-	if [ $R -eq 0 ];then
-		/etc/init.d/transmission-daemon stop
-		sleep 10
-	fi
+	transmission-stop
 }
 
 function updateProgressDir {
@@ -101,10 +95,10 @@ rm -rf $INBOX_DIR/._*
 shopt -s nullglob
 shopt -s dotglob # To include hidden files
 inputFiles=($INBOX_DIR/*)
-if [ ${#inputFiles[@]} -gt 0 ]; then 
-	echo "Input files: $inputFiles"; 
+if [ ${#inputFiles[@]} -gt 0 ]; then
+	echo "Input files: $inputFiles";
 	if [[ $MY_IP == $VPN_IP ]]; then
-		startTransmission		
+		startTransmission
 		cd $INBOX_DIR/
 		for file in *
 		do
@@ -116,7 +110,7 @@ if [ ${#inputFiles[@]} -gt 0 ]; then
 	else
                 echo "Starting VPN"
                 startVPN
-	fi	
+	fi
 fi
 
 rm -rf $PROGRESS_DIR/._*
@@ -148,4 +142,4 @@ if [ $HAS_WORK -ne 0 ];then
  	fi
 else
 	stopTransmission
-fi	
+fi
