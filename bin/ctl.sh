@@ -38,9 +38,13 @@ else
 	echo "VPN: OFF ($MY_IP)"
 fi
 
-function startVPN {
+function stopVPN {
 	echo "Killing openvpn"
 	ps ax | grep 'openvpn' | grep -vw grep | awk '{print $1}' | xargs kill -s kill
+}
+
+function startVPN {
+	stopVPN
 	sleep 5
 	CMD="cd /etc/openvpn && openvpn --config '$VPN_CFG' &"
 	echo "Executing: $CMD"
@@ -94,13 +98,15 @@ function updateProgressDir {
 rm -rf $INBOX_DIR/._*
 shopt -s nullglob
 shopt -s dotglob # To include hidden files
-inputFiles=($INBOX_DIR/*)
+HAS_WORK=0
+inputFiles=($INBOX_DIR/*.torrent)
 if [ ${#inputFiles[@]} -gt 0 ]; then
+	HAS_WORK=1
 	echo "Input files: $inputFiles";
 	if [[ $MY_IP == $VPN_IP ]]; then
 		startTransmission
 		cd $INBOX_DIR/
-		for file in *
+		for file in *.torrent
 		do
 			echo "Starting download of: $file"
 		  	transmission-remote --add ${INBOX_DIR}/"$file"
@@ -114,7 +120,6 @@ if [ ${#inputFiles[@]} -gt 0 ]; then
 fi
 
 rm -rf $PROGRESS_DIR/._*
-HAS_WORK=0
 cd $PROGRESS_DIR/
 for file in *
 do
@@ -142,4 +147,5 @@ if [ $HAS_WORK -ne 0 ];then
  	fi
 else
 	stopTransmission
+	stopVPN
 fi
