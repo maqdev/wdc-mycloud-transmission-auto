@@ -95,7 +95,7 @@ function updateProgressDir {
   	# fls "${PROGRESS_DIR}"
 }
 
-rm -rf $INBOX_DIR/._*
+rm -rf $INBOX_DIR/.*.torrent
 shopt -s nullglob
 shopt -s dotglob # To include hidden files
 HAS_WORK=0
@@ -127,7 +127,7 @@ do
 	if [[ $file == *-Stopped-* ]]; then
 	  	true # echo " STOPPED"
 	else
-		if [[ $file == *-100%-Done-* ]]; then
+		if [[ $file == *-100%-Done-* ]] || [[ $file == *-Idle-100%-Unknown-* ]] || [[ $file == *-Seeding-100%-* ]]; then
 			true # echo " COMPLETE"
 		else
 			true # echo " IN-PROGRESS"
@@ -135,6 +135,8 @@ do
 		fi
 	fi
 done
+
+echo "Has work: $HAS_WORK"
 
 if [ $HAS_WORK -ne 0 ];then
 	if [[ $MY_IP == $VPN_IP ]]; then
